@@ -29,17 +29,21 @@ with open('hindiphrases.txt','r') as f:
         except:
             continue
 
+def load_question():
+    loaded_q.append(choice(hindiphrases))
+    print("loaded_ q: ",loaded_q)
+    eng = loaded_q[len(loaded_q)-1][0]
+    q = f"Translate: {eng}"
+    return q
+
+
 @app.route('/',methods = ['GET','POST'])
 def basic():
     with open('user_score.txt','r') as f:
         score = int(f.read())
     good = False
-    loaded_q.append(choice(hindiphrases))
     response = ""
-    print("loaded_ q: ",loaded_q)
-    q = loaded_q[len(loaded_q)-1][0]
-    q = f"Translate: {eng}"
-   
+    q = load_question()
     if request.method == 'POST':
         if(request.form['text']):
             t = request.form['text'].lower().translate(str.maketrans('','',string.punctuation)).strip()
@@ -57,7 +61,8 @@ def basic():
                 with open('user_score.txt','w') as f:
                     f.write(str(score))
             else:
-                response = f"Sorry, try : {loaded_q[len(loaded_q)-1][1]} again!"
+                response = f"Sorry, try again!"
+
     return render_template('index.html',q=q,response = response,score=score)        
 
 app.run(debug=True)
