@@ -15,7 +15,6 @@ with open('hindiphrases.txt','r') as f:
             
             line = line.strip('\n')
             eng,hind = line.split('-')
-            print("eng: ",eng, " hind: ",hind)
             if '/' in hind:
                 hind1,hind2 = hind.split('/')
                 hind1 = hind1.translate(str.maketrans('','',string.punctuation)).lower().strip()
@@ -27,7 +26,6 @@ with open('hindiphrases.txt','r') as f:
                 l = [eng,hind]
                 
             hindiphrases.append(l)
-            print(hindiphrases)
         except:
             continue
 
@@ -35,11 +33,32 @@ with open('hindiphrases.txt','r') as f:
 def basic():
     with open('user_score.txt','r') as f:
         score = int(f.read())
+    good = False
     loaded_q.append(choice(hindiphrases))
+    response = ""
+    print("loaded_ q: ",loaded_q)
     q = loaded_q[len(loaded_q)-1][0]
     q = f"Translate: {eng}"
-    return render_template('index.html',q=q)
-
+   
+    if request.method == 'POST':
+        if(request.form['text']):
+            t = request.form['text'].lower().translate(str.maketrans('','',string.punctuation)).strip()
+            # first check how many answers we have; if 2, check if answer is there
+            # Note becauase Python is zero-indexed we are getting the previous index of our list with -2
+            
+            for i in loaded_q[len(loaded_q)-2][1:]:
+                if t == i:
+                    good = True
+            if good:
+                response = "Excellent!"
+                with open('user_score.txt','r') as f:
+                    score = int(f.read())
+                    score+=1
+                with open('user_score.txt','w') as f:
+                    f.write(str(score))
+            else:
+                response = f"Sorry, try : {loaded_q[len(loaded_q)-1][1]} again!"
+    return render_template('index.html',q=q,response = response,score=score)        
 
 app.run(debug=True)
 
